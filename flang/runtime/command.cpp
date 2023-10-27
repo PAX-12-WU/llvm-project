@@ -14,6 +14,15 @@
 #include "flang/Runtime/descriptor.h"
 #include <cstdlib>
 #include <limits>
+#ifdef _WIN32
+// On Windows GetCurrentProcessId returns a DWORD
+#include <processthreadsapi.h>
+#define getpid GetCurrentProcessId
+typedef DWORD pid_t;
+inline pid_t getpid() { return GetCurrentProcessId(); }
+#else
+#include <unistd.h> //getpid()
+#endif
 
 namespace Fortran::runtime {
 std::int32_t RTNAME(ArgumentCount)() {
@@ -24,6 +33,8 @@ std::int32_t RTNAME(ArgumentCount)() {
   }
   return 0;
 }
+
+pid_t RTNAME(GetPID)() { return getpid(); }
 
 // Returns the length of the \p string. Assumes \p string is valid.
 static std::int64_t StringLength(const char *string) {
