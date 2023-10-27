@@ -14,6 +14,14 @@
 #include "flang/Runtime/descriptor.h"
 #include <cstdlib>
 #include <limits>
+#ifdef _WIN32
+// On Windows* OS _getpid() returns int (not pid_t), declared in process.h
+#include <process.h>
+#define getpid _getpid
+typedef int pid_t;
+#else
+#include <unistd.h> //getpid()
+#endif
 
 namespace Fortran::runtime {
 std::int32_t RTNAME(ArgumentCount)() {
@@ -24,6 +32,8 @@ std::int32_t RTNAME(ArgumentCount)() {
   }
   return 0;
 }
+
+pid_t RTNAME(GetPID)() { return getpid(); }
 
 // Returns the length of the \p string. Assumes \p string is valid.
 static std::int64_t StringLength(const char *string) {

@@ -11,6 +11,13 @@
 
 #include "flang/Runtime/entry-names.h"
 
+#ifdef _WIN32
+// On Windows* OS _getpid() returns int (not pid_t)
+typedef int pid_t;
+#else
+#include "sys/types.h" //pid_t
+#endif
+
 #include <cstdint>
 
 namespace Fortran::runtime {
@@ -22,6 +29,9 @@ extern "C" {
 // Lowering may need to cast the result to match the precision of the default
 // integer kind.
 std::int32_t RTNAME(ArgumentCount)();
+
+// Calls getpid()
+pid_t RTNAME(GetPID)();
 
 // 16.9.82 GET_COMMAND
 // Try to get the value of the whole command. All of the parameters are
