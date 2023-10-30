@@ -35,6 +35,14 @@ mlir::Value genGetCommand(fir::FirOpBuilder &, mlir::Location,
 /// GETPID intrinsic.
 mlir::Value genGetPID(fir::FirOpBuilder &, mlir::Location);
 
+/// Generate a call to the GetUID runtime function which implements the
+/// GETUID intrinsic.
+mlir::Value genGetUID(fir::FirOpBuilder &, mlir::Location);
+
+/// Generate a call to the GetGID runtime function which implements the
+/// GETGID intrinsic.
+mlir::Value genGetGID(fir::FirOpBuilder &, mlir::Location);
+
 /// Generate a call to the GetCommandArgument runtime function which implements
 /// the GET_COMMAND_ARGUMENT intrinsic.
 /// \p value, \p length and \p errmsg must be fir.box that can be absent (but

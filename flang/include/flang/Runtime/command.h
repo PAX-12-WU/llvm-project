@@ -33,6 +33,12 @@ std::int32_t RTNAME(ArgumentCount)();
 // Calls getpid()
 pid_t RTNAME(GetPID)();
 
+// Calls getuid()
+uid_t RTNAME(GetUID)();
+
+// Calls getgid()
+gid_t RTNAME(GetGID)();
+
 // 16.9.82 GET_COMMAND
 // Try to get the value of the whole command. All of the parameters are
 // optional.

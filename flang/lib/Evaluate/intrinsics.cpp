@@ -500,6 +500,8 @@ static const IntrinsicInterface genericIntrinsicFunction[]{
     {"get_team", {{"level", DefaultInt, Rank::scalar, Optionality::optional}},
         TeamType, Rank::scalar, IntrinsicClass::transformationalFunction},
     {"getpid", {}, DefaultInt},
+    {"getuid", {}, DefaultInt},
+    {"getuid_gid", {}, DefaultInt},
     {"huge",
         {{"x", SameIntOrReal, Rank::anyOrAssumedRank, Optionality::required,
             common::Intent::In, {ArgFlag::canBeNull}}},

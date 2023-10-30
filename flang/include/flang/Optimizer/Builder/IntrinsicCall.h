@@ -225,6 +225,10 @@ struct IntrinsicLibrary {
   void genGetCommand(mlir::ArrayRef<fir::ExtendedValue> args);
   mlir::Value genGetPID(mlir::Type resultType,
                         llvm::ArrayRef<mlir::Value> args);
+  mlir::Value genGetUID(mlir::Type resultType,
+                        llvm::ArrayRef<mlir::Value> args);
+  mlir::Value genGetGID(mlir::Type resultType,
+                        llvm::ArrayRef<mlir::Value> args);
   void genGetCommandArgument(mlir::ArrayRef<fir::ExtendedValue> args);
   void genGetEnvironmentVariable(llvm::ArrayRef<fir::ExtendedValue>);
   fir::ExtendedValue genIall(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);

@@ -35,6 +35,10 @@ std::int32_t RTNAME(ArgumentCount)() {
 
 pid_t RTNAME(GetPID)() { return getpid(); }
 
+uid_t RTNAME(GetUID)() { return getuid(); }
+
+gid_t RTNAME(GetGID)() { return getgid(); }
+
 // Returns the length of the \p string. Assumes \p string is valid.
 static std::int64_t StringLength(const char *string) {
   std::size_t length{std::strlen(string)};

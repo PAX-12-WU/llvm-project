@@ -68,6 +68,14 @@ constexpr TypeBuilderFunc getModel<short int>() {
     return mlir::IntegerType::get(context, 8 * sizeof(short int));
   };
 }
+
+template <>
+constexpr TypeBuilderFunc getModel<unsigned int>() {
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    return mlir::IntegerType::get(context, 8 * sizeof(unsigned int));
+  };
+}
+
 template <>
 constexpr TypeBuilderFunc getModel<int>() {
   return [](mlir::MLIRContext *context) -> mlir::Type {
