@@ -10,18 +10,20 @@
 // extensions that will eventually be implemented in Fortran.
 
 #include "flang/Runtime/extensions.h"
+#include "terminator.h"
 #include "flang/Runtime/command.h"
 #include "flang/Runtime/descriptor.h"
 #include "flang/Runtime/io-api.h"
-#include <string.h>
+#include "flang/Runtime/time-intrinsic.h" // copyBufferAndPad
+#include <cstring>
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
 
+#include <cstdlib> // wcstombs_s
 #include <lmcons.h> // UNLEN=256
-#include <stdlib.h> // wcstombs_s
 #include <wchar.h> // wchar_t cast to LPWSTR
 #pragma comment(lib, "Advapi32.lib") // Link Advapi32.lib for GetUserName
 #define LOGIN_NAME_MAX UNLEN
@@ -49,7 +51,11 @@ inline int getlogin_r(char *buf, size_t bufSize) {
 #include <unistd.h>
 #else
 // System is not posix-compliant
-inline int getlogin_r(char *buf, size_t bufsize) { return -1; }
+inline int getlogin_r(char *buf, size_t bufSize) {
+  std::memset(buf, ' ', bufSize - 1);
+  buf[bufSize - 1] = '\0';
+  return 0;
+}
 #endif
 
 extern "C" {
@@ -78,15 +84,13 @@ void FORTRAN_PROCEDURE_NAME(getarg)(
 
 void FORTRAN_PROCEDURE_NAME(getlog)(std::int8_t *arg, std::int64_t length) {
   std::array<char, LOGIN_NAME_MAX + 1> str;
-  int error = getlogin_r(str.data(), str.size());
-  assert(error == 0 && "getlogin_r returned an error");
 
-  // Trim space from right/end
-  int i = str.size();
-  while (' ' == str[--i]) {
-    str[i] = 0;
-  }
-  strncpy(reinterpret_cast<char *>(arg), str.data(), length);
+  int error = getlogin_r(str.data(), str.size());
+  Terminator terminator{__FILE__, __LINE__};
+  RUNTIME_CHECK(terminator, error == 0);
+
+  copyBufferAndPad(
+      reinterpret_cast<char *>(arg), length, str.data(), str.size());
 }
 
 } // namespace Fortran::runtime
