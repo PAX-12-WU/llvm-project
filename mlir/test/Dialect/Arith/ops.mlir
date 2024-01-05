@@ -1139,34 +1139,7 @@ func.func @select_tensor_encoding(
   return %0 : tensor<8xi32, "foo">
 }
 
-
-// // CHECK-LABEL: @fastmath
-// func.func @fastmath(%arg0: f32, %arg1: f32, %arg2: i32) {
-// // CHECK: {{.*}} = arith.addf %arg0, %arg1 fastmath<fast> : f32
-// // CHECK: {{.*}} = arith.subf %arg0, %arg1 fastmath<fast> : f32
-// // CHECK: {{.*}} = arith.mulf %arg0, %arg1 fastmath<fast> : f32
-// // CHECK: {{.*}} = arith.divf %arg0, %arg1 fastmath<fast> : f32
-// // CHECK: {{.*}} = arith.remf %arg0, %arg1 fastmath<fast> : f32
-// // CHECK: {{.*}} = arith.negf %arg0 fastmath<fast> : f32
-//   %0 = arith.addf %arg0, %arg1 fastmath<fast> : f32
-//   %1 = arith.subf %arg0, %arg1 fastmath<fast> : f32
-//   %2 = arith.mulf %arg0, %arg1 fastmath<fast> : f32
-//   %3 = arith.divf %arg0, %arg1 fastmath<fast> : f32
-//   %4 = arith.remf %arg0, %arg1 fastmath<fast> : f32
-//   %5 = arith.negf %arg0 fastmath<fast> : f32
-// // CHECK: {{.*}} = arith.addf %arg0, %arg1 : f32
-//   %6 = arith.addf %arg0, %arg1 fastmath<none> : f32
-// // CHECK: {{.*}} = arith.addf %arg0, %arg1 fastmath<nnan,ninf> : f32
-//   %7 = arith.addf %arg0, %arg1 fastmath<nnan,ninf> : f32
-// // CHECK: {{.*}} = arith.mulf %arg0, %arg1 fastmath<fast> : f32
-//   %8 = arith.mulf %arg0, %arg1 fastmath<reassoc,nnan,ninf,nsz,arcp,contract,afn> : f32
-// // CHECK: {{.*}} = arith.cmpf oeq, %arg0, %arg1 fastmath<fast> : f32
-//   %9 = arith.cmpf oeq, %arg0, %arg1 fastmath<fast> : f32
-
-//   return
-// }
-
-// CHECK-LABEL: @no_integer_or_index
+// CHECK-LABEL: @intflags_func
 func.func @intflags_func(%arg0: i64, %arg1: i64) {
   // CHECK: %{{.*}} = add nsw i64 %{{.*}}, %{{.*}}
   %0 = arith.addi %arg0, %arg1 overflow <nsw> : i64

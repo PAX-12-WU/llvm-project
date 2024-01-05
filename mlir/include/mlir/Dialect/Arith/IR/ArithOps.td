@@ -166,21 +166,11 @@ class Arith_IntArithmeticOpWithOverflowFlag<string mnemonic, list<Trait> traits 
   //   moduleImport.setIntegerOverflowFlagsAttr(inst, op);
   //   $res = op;
   // }];
-  //   let builders = [
-  //   OpBuilder<(ins "Value":$lhs, "Value":$rhs), [{
-  //     build($_builder, $_state, lhs.getType(), ::getI1SameShape(lhs.getType()),
-  //           lhs, rhs);
-  //   }]>
-  // ];
-//   let assemblyFormat = [{
-//     $lhs `,` $rhs (`overflow` `` $overflowFlags^)?
-//     attr-dict `:` type($result)
-//   }];
+
   // string arithBuilder =
   //   "$res = builder.Create" # instName #
   //   "($lhs, $rhs, /*Name=*/\"\", op.hasNoUnsignedWrap(), op.hasNoSignedWrap());";
 
-// }
 
 //===----------------------------------------------------------------------===//
 // ConstantOp
