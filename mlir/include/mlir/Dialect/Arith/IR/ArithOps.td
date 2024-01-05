@@ -137,6 +137,51 @@ class Arith_CompareOpOfAnyRank<string mnemonic, list<Trait> traits = []> :
   let results = (outs BoolLikeOfAnyRank:$result);
 }
 
+class Arith_IntArithmeticOpWithOverflowFlag<string mnemonic, list<Trait> traits = []> :
+    Arith_BinaryOp<mnemonic,
+      !listconcat([Pure, DeclareOpInterfaceMethods<ArithIntegerOverflowFlagsInterface>],
+                  traits)>,
+    Arguments<(ins SignlessIntegerLike:$lhs, SignlessIntegerLike:$rhs,
+      DefaultValuedAttr<
+        Arith_IntegerOverflowAttr, "::mlir::arith::IntegerOverflowFlags::none">:$overflow)>,
+    Results<(outs SignlessIntegerLike:$result)> {
+
+  let assemblyFormat = [{ $lhs `,` $rhs (`overflow` `` $overflow^)?
+                          attr-dict `:` type($result) }];
+
+  let builders = [
+    OpBuilder<(ins "Value":$lhs, "Value":$rhs), [{
+      build($_builder, $_state, lhs, rhs,
+          mlir::arith::IntegerOverflowFlagsAttr::get($_builder.getContext(),
+              mlir::arith::IntegerOverflowFlags::none));
+    }]>
+  ];
+
+  let hasFolder = 1;
+  let hasCanonicalizer = 1;
+
+}
+  //  string mlirBuilder = [{
+  //   auto op = $_builder.create<$_qualCppClassName>($_location, $lhs, $rhs);
+  //   moduleImport.setIntegerOverflowFlagsAttr(inst, op);
+  //   $res = op;
+  // }];
+  //   let builders = [
+  //   OpBuilder<(ins "Value":$lhs, "Value":$rhs), [{
+  //     build($_builder, $_state, lhs.getType(), ::getI1SameShape(lhs.getType()),
+  //           lhs, rhs);
+  //   }]>
+  // ];
+//   let assemblyFormat = [{
+//     $lhs `,` $rhs (`overflow` `` $overflowFlags^)?
+//     attr-dict `:` type($result)
+//   }];
+  // string arithBuilder =
+  //   "$res = builder.Create" # instName #
+  //   "($lhs, $rhs, /*Name=*/\"\", op.hasNoUnsignedWrap(), op.hasNoSignedWrap());";
+
+// }
+
 //===----------------------------------------------------------------------===//
 // ConstantOp
 //===----------------------------------------------------------------------===//
@@ -192,7 +237,7 @@ def Arith_ConstantOp : Op<Arith_Dialect, "constant",
 // AddIOp
 //===----------------------------------------------------------------------===//
 
-def Arith_AddIOp : Arith_TotalIntBinaryOp<"addi", [Commutative]> {
+def Arith_AddIOp : Arith_IntArithmeticOpWithOverflowFlag<"addi", []> {
   let summary = "integer addition operation";
   let description = [{
     Performs N-bit addition on the operands. The operands are interpreted as 
@@ -278,7 +323,7 @@ def Arith_AddUIExtendedOp : Arith_Op<"addui_extended", [Pure, Commutative,
 // SubIOp
 //===----------------------------------------------------------------------===//
 
-def Arith_SubIOp : Arith_TotalIntBinaryOp<"subi"> {
+def Arith_SubIOp : Arith_IntArithmeticOpWithOverflowFlag<"subi"> {
   let summary = [{
     Integer subtraction operation.
   }];
@@ -302,7 +347,7 @@ def Arith_SubIOp : Arith_TotalIntBinaryOp<"subi"> {
 // MulIOp
 //===----------------------------------------------------------------------===//
 
-def Arith_MulIOp : Arith_TotalIntBinaryOp<"muli", [Commutative]> {
+def Arith_MulIOp : Arith_IntArithmeticOpWithOverflowFlag<"muli", [Commutative]> {
   let summary = [{
     Integer multiplication operation.
   }];
@@ -721,7 +766,7 @@ def Arith_XOrIOp : Arith_TotalIntBinaryOp<"xori", [Commutative]> {
 // ShLIOp
 //===----------------------------------------------------------------------===//
 
-def Arith_ShLIOp : Arith_TotalIntBinaryOp<"shli"> {
+def Arith_ShLIOp : Arith_IntArithmeticOpWithOverflowFlag<"shli"> {
   let summary = "integer left-shift";
   let description = [{
     The `shli` operation shifts the integer value of the first operand to the left 

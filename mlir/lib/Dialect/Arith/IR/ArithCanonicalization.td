@@ -36,23 +36,23 @@ class cast<string type> : NativeCodeCall<"::mlir::cast<" # type # ">($0)">;
 // addi(addi(x, c0), c1) -> addi(x, c0 + c1)
 def AddIAddConstant :
     Pat<(Arith_AddIOp:$res
-          (Arith_AddIOp $x, (ConstantLikeMatcher APIntAttr:$c0)),
-          (ConstantLikeMatcher APIntAttr:$c1)),
-        (Arith_AddIOp $x, (Arith_ConstantOp (AddIntAttrs $res, $c0, $c1)))>;
+          (Arith_AddIOp $x, (ConstantLikeMatcher APIntAttr:$c0), $off0),
+          (ConstantLikeMatcher APIntAttr:$c1), $off1),
+        (Arith_AddIOp $x, (Arith_ConstantOp (AddIntAttrs $res, $c0, $c1, $off0)), $off1)>;
 
 // addi(subi(x, c0), c1) -> addi(x, c1 - c0)
 def AddISubConstantRHS :
     Pat<(Arith_AddIOp:$res
-          (Arith_SubIOp $x, (ConstantLikeMatcher APIntAttr:$c0)),
-          (ConstantLikeMatcher APIntAttr:$c1)),
-        (Arith_AddIOp $x, (Arith_ConstantOp (SubIntAttrs $res, $c1, $c0)))>;
+          (Arith_SubIOp $x, (ConstantLikeMatcher APIntAttr:$c0), $off1),
+          (ConstantLikeMatcher APIntAttr:$c1), $off0),
+        (Arith_AddIOp $x, (Arith_ConstantOp (SubIntAttrs $res, $c1, $c0)), $off0)>;
 
 // addi(subi(c0, x), c1) -> subi(c0 + c1, x)
 def AddISubConstantLHS :
     Pat<(Arith_AddIOp:$res
-          (Arith_SubIOp (ConstantLikeMatcher APIntAttr:$c0), $x),
-          (ConstantLikeMatcher APIntAttr:$c1)),
-        (Arith_SubIOp (Arith_ConstantOp (AddIntAttrs $res, $c0, $c1)), $x)>;
+          (Arith_SubIOp (ConstantLikeMatcher APIntAttr:$c0), $x, $off1),
+          (ConstantLikeMatcher APIntAttr:$c1), $off0),
+        (Arith_SubIOp (Arith_ConstantOp (AddIntAttrs $res, $c0, $c1)), $x, $off1)>;
 
 def IsScalarOrSplatNegativeOne :
     Constraint<And<[
@@ -63,16 +63,16 @@ def IsScalarOrSplatNegativeOne :
 def AddIMulNegativeOneRhs :
     Pat<(Arith_AddIOp
            $x,
-           (Arith_MulIOp $y, (ConstantLikeMatcher AnyAttr:$c0))),
-        (Arith_SubIOp $x, $y),
+           (Arith_MulIOp $y, (ConstantLikeMatcher AnyAttr:$c0), $off1), $off0),
+        (Arith_SubIOp $x, $y, $off1),
         [(IsScalarOrSplatNegativeOne $c0)]>;
 
 // addi(muli(x, -1), y) -> subi(y, x)
 def AddIMulNegativeOneLhs :
     Pat<(Arith_AddIOp
-           (Arith_MulIOp $x, (ConstantLikeMatcher AnyAttr:$c0)),
-           $y),
-        (Arith_SubIOp $y, $x),
+           (Arith_MulIOp $x, (ConstantLikeMatcher AnyAttr:$c0), $off1),
+           $y, $off0),
+        (Arith_SubIOp $y, $x, $off0),
         [(IsScalarOrSplatNegativeOne $c0)]>;
 
 // muli(muli(x, c0), c1) -> muli(x, c0 * c1)
@@ -90,7 +90,7 @@ def MulIMulIConstant :
 // uses. Since the 'overflow' result is unused, any replacement value will do.
 def AddUIExtendedToAddI:
     Pattern<(Arith_AddUIExtendedOp:$res $x, $y),
-             [(Arith_AddIOp $x, $y), (replaceWithValue $x)],
+             [(Arith_AddIOp $x, $y, $off0), (replaceWithValue $x)],
              [(Constraint<CPred<"$0.getUses().empty()">> $res__1)]>;
 
 //===----------------------------------------------------------------------===//
@@ -108,8 +108,8 @@ def SubIRHSAddConstant :
 def SubILHSAddConstant :
     Pat<(Arith_SubIOp:$res
           (ConstantLikeMatcher APIntAttr:$c1),
-          (Arith_AddIOp $x, (ConstantLikeMatcher APIntAttr:$c0))),
-        (Arith_SubIOp (Arith_ConstantOp (SubIntAttrs $res, $c1, $c0)), $x)>;
+          (Arith_AddIOp $x, (ConstantLikeMatcher APIntAttr:$c0), $off)),
+        (Arith_SubIOp (Arith_ConstantOp (SubIntAttrs $res, $c1, $c0)), $x, $off)>;
 
 // subi(subi(x, c0), c1) -> subi(x, c0 + c1)
 def SubIRHSSubConstantRHS :
@@ -121,28 +121,28 @@ def SubIRHSSubConstantRHS :
 // subi(subi(c0, x), c1) -> subi(c0 - c1, x)
 def SubIRHSSubConstantLHS :
     Pat<(Arith_SubIOp:$res
-          (Arith_SubIOp (ConstantLikeMatcher APIntAttr:$c0), $x),
-          (ConstantLikeMatcher APIntAttr:$c1)),
-        (Arith_SubIOp (Arith_ConstantOp (SubIntAttrs $res, $c0, $c1)), $x)>;
+          (Arith_SubIOp (ConstantLikeMatcher APIntAttr:$c0), $x, $off0),
+          (ConstantLikeMatcher APIntAttr:$c1), $off1),
+        (Arith_SubIOp (Arith_ConstantOp (SubIntAttrs $res, $c0, $c1)), $x, $off1)>;
 
 // subi(c1, subi(x, c0)) -> subi(c0 + c1, x)
 def SubILHSSubConstantRHS :
     Pat<(Arith_SubIOp:$res
           (ConstantLikeMatcher APIntAttr:$c1),
-          (Arith_SubIOp $x, (ConstantLikeMatcher APIntAttr:$c0))),
-        (Arith_SubIOp (Arith_ConstantOp (AddIntAttrs $res, $c0, $c1)), $x)>;
+          (Arith_SubIOp $x, (ConstantLikeMatcher APIntAttr:$c0), $off0), $off1),
+        (Arith_SubIOp (Arith_ConstantOp (AddIntAttrs $res, $c0, $c1)), $x, $off1)>;
 
 // subi(c1, subi(c0, x)) -> addi(x, c1 - c0)
 def SubILHSSubConstantLHS :
     Pat<(Arith_SubIOp:$res
           (ConstantLikeMatcher APIntAttr:$c1),
-          (Arith_SubIOp (ConstantLikeMatcher APIntAttr:$c0), $x)),
-        (Arith_AddIOp $x, (Arith_ConstantOp (SubIntAttrs $res, $c1, $c0)))>;
+          (Arith_SubIOp (ConstantLikeMatcher APIntAttr:$c0), $x, $off0), $off1),
+        (Arith_AddIOp $x, (Arith_ConstantOp (SubIntAttrs $res, $c1, $c0)), $off1)>;
 
 // subi(subi(a, b), a) -> subi(0, b)
 def SubISubILHSRHSLHS :
-    Pat<(Arith_SubIOp:$res (Arith_SubIOp $x, $y), $x),
-        (Arith_SubIOp (Arith_ConstantOp (GetZeroAttr $y)), $y)>;
+    Pat<(Arith_SubIOp:$res (Arith_SubIOp $x, $y), $x, $off0),
+        (Arith_SubIOp (Arith_ConstantOp (GetZeroAttr $y)), $y, $off0)>;
 
 //===----------------------------------------------------------------------===//
 // MulSIExtendedOp
