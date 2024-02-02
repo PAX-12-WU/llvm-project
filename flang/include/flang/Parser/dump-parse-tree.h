@@ -206,6 +206,7 @@ public:
   NODE(CompilerDirective, IgnoreTKR)
   NODE(CompilerDirective, LoopCount)
   NODE(CompilerDirective, NameValue)
+  NODE(CompilerDirective, Condition)
   NODE(parser, ComplexLiteralConstant)
   NODE(parser, ComplexPart)
   NODE(parser, ComponentArraySpec)

@@ -1345,6 +1345,7 @@ Prescanner::LineClassification Prescanner::ClassifyLine(
   if (std::optional<std::size_t> quoteOffset{IsIncludeLine(start)}) {
     return {LineClassification::Kind::IncludeLine, *quoteOffset};
   }
+
   if (const char *dir{IsPreprocessorDirectiveLine(start)}) {
     if (IsDirective("if", dir) || IsDirective("elif", dir) ||
         IsDirective("else", dir) || IsDirective("endif", dir)) {

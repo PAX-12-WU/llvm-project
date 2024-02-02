@@ -1822,6 +1822,9 @@ public:
             [&](const std::list<CompilerDirective::NameValue> &names) {
               Walk("!DIR$ ", names, " ");
             },
+            [&](const CompilerDirective::Condition &condition) {
+              Walk("!DIR$ IF (",  condition.v , ")");
+            },
         },
         x.u);
     Put('\n');
@@ -1841,6 +1844,19 @@ public:
     Walk(std::get<Name>(x.t));
     Walk("=", std::get<std::optional<std::uint64_t>>(x.t));
   }
+
+  //   void Unparse(const AccAtomicCapture &x) {
+  //   BeginDirIF();
+  //   Word("!DIR$ IF");
+  //   Put("(");
+  //   EndDirIF();
+  //   Walk(std::get<AccAtomicCapture::Stmt1>(x.t));
+  //   Put(")");
+  //   Walk(std::get<AccAtomicCapture::Stmt2>(x.t));
+  //   BeginDirIF();
+  //   Word("!DIR$ ENDIF\n");
+  //   EndDirIF();
+  // }
 
   // OpenACC Directives & Clauses
   void Unparse(const AccAtomicCapture &x) {
@@ -2771,6 +2787,8 @@ private:
   void EndOpenMP() { openmpDirective_ = false; }
   void BeginOpenACC() { openaccDirective_ = true; }
   void EndOpenACC() { openaccDirective_ = false; }
+  // void BeginDirIF() { ifDirective_ = true; }
+  // void EndDirIF() { ifDirective_ = false; }
 
   // Call back to the traversal framework.
   template <typename T> void Walk(const T &x) {
@@ -2786,6 +2804,12 @@ private:
       Word(prefix), Walk(*x), Word(suffix);
     }
   }
+
+  // template <typename A>
+  // void Walk(const char *prefix, const A &x, const char *suffix) {
+  //     Word(prefix), Walk(*x), Word(suffix);
+  // }
+
   template <typename A>
   void Walk(const std::optional<A> &x, const char *suffix = "") {
     return Walk("", x, suffix);

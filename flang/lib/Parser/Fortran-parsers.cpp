@@ -1262,15 +1262,20 @@ TYPE_PARSER(construct<StatOrErrmsg>("STAT =" >> statVariable) ||
 // !DIR$ IGNORE_TKR [ [(tkrdmac...)] name ]...
 // !DIR$ LOOP COUNT (n1[, n2]...)
 // !DIR$ name...
+// !DIR$ IF condition...
 constexpr auto ignore_tkr{
     "DIR$ IGNORE_TKR" >> optionalList(construct<CompilerDirective::IgnoreTKR>(
                              maybe(parenthesized(many(letter))), name))};
 constexpr auto loopCount{
     "DIR$ LOOP COUNT" >> construct<CompilerDirective::LoopCount>(
                              parenthesized(nonemptyList(digitString64)))};
+constexpr auto condition{
+    "DIR$ IF" >> construct<CompilerDirective::Condition>(
+                             parenthesized(many(letter)))};
 TYPE_PARSER(beginDirective >>
     sourced(construct<CompilerDirective>(ignore_tkr) ||
         construct<CompilerDirective>(loopCount) ||
+        construct<CompilerDirective>(condition) ||        
         construct<CompilerDirective>(
             "DIR$" >> many(construct<CompilerDirective::NameValue>(name,
                           maybe(("="_tok || ":"_tok) >> digitString64))))) /
